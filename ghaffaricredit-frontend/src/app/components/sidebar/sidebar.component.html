@@ -1,0 +1,26 @@
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-mark">GC</div>
+    <div>
+      <strong>Ghaffari</strong>
+      <span>Credit hub</span>
+    </div>
+  </div>
+
+  <nav class="nav" aria-label="Sidebar navigation">
+    <button
+      *ngFor="let item of navItems"
+      type="button"
+      class="nav-item"
+      [class.active]="activeItem() === item.label"
+      [attr.data-nav-item]="item.label"
+      (click)="selectItem(item.label)"
+    >
+      <span class="nav-icon">{{ item.icon }}</span>
+      <span class="nav-copy">
+        <span class="nav-label">{{ item.label }}</span>
+        <small>{{ item.description }}</small>
+      </span>
+    </button>
+  </nav>
+</aside>

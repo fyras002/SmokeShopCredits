@@ -1,0 +1,362 @@
+<div class="app-shell">
+  <main class="content-panel">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">{{ 'Overview' | translate }}</p>
+        <h1>{{ title() }}</h1>
+      </div>
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <button type="button" class="secondary-button" (click)="toggleLanguage()" [title]="'Change language' | translate">
+          {{ getLanguageLabel() }}
+        </button>
+        <button class="primary-button" type="button" (click)="openAddCreditForm()">{{ '+ New credit' | translate }}</button>
+      </div>
+    </header>
+
+    <section class="metrics-grid">
+      <article class="metric-card">
+        <span class="metric-label">{{ 'Active loans' | translate }}</span>
+        <strong>{{ activeCreditsCount() }}</strong>
+        <small>{{ 'Current portfolio' | translate }}</small>
+      </article>
+      <article class="metric-card">
+        <span class="metric-label">{{ 'Paid loans' | translate }}</span>
+        <strong>{{ paidLoansCount() }}</strong>
+        <small>{{ 'Completed this period' | translate }}</small>
+      </article>
+      <article class="metric-card">
+        <span class="metric-label">{{ 'Total credit amount' | translate }}</span>
+        <strong>{{ totalCreditsAmount() | number: '1.0-0' }} DT</strong>
+        <small>{{ 'Across all credits' | translate }}</small>
+      </article>
+    </section>
+
+    <section class="main-grid">
+      <article class="panel-card">
+        <div class="panel-header">
+          <h2>{{ 'Recent credits' | translate }}</h2>
+          <button type="button" class="text-link-button" (click)="toggleAllCredits()">
+            {{ showAllCredits() ? ('Show less' | translate) : ('View all' | translate) }}
+          </button>
+        </div>
+
+        @if (recentCredits().length > 0) {
+          <ul class="credit-list">
+            @for (credit of recentCredits(); track credit.id) {
+              <li>
+                <div>
+                  <h3>{{ credit.personName || ('Unknown person' | translate) }}</h3>
+                  <div class="credit-meta-row">
+                    <span class="status-pill {{ getStatusClass(credit.status, credit.amount) }}">
+                      {{ getStatusLabel(credit.status, credit.amount) }}
+                    </span>
+                    <span>{{ getRelativeDateLabel(credit.createdAt) }}</span>
+                  </div>
+                </div>
+                <strong>{{ credit.amount | number: '1.0-0' }} DT</strong>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="empty-state">{{ 'No recent credits found.' | translate }}</p>
+        }
+      </article>
+
+      <article class="panel-card quick-actions">
+        <div class="panel-header">
+          <h2>{{ 'Quick actions' | translate }}</h2>
+        </div>
+
+        <div class="action-stack">
+          <button type="button" (click)="openAddPersonForm()">{{ 'Add person' | translate }}</button>
+          <button type="button" (click)="openAddCreditForm()">{{ 'Add credit' | translate }}</button>
+          <button type="button" (click)="openSearchPersonForm()">{{ 'Search person' | translate }}</button>
+          <button type="button" (click)="openEditCreditForm()">{{ 'Edit credit' | translate }}</button>
+          <button type="button" (click)="printAllCredits()">{{ 'Print all credits' | translate }}</button>
+        </div>
+      </article>
+    </section>
+  </main>
+</div>
+
+@if (showEditCreditForm()) {
+  <div class="modal-backdrop" (click)="closeEditCreditForm()">
+    <div class="person-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ 'Edit credit' | translate }}</h3>
+        <button type="button" class="close-button" (click)="closeEditCreditForm()">×</button>
+      </div>
+
+      @if (editableCredits().length > 0) {
+        <div class="search-box" style="margin-bottom: 1rem;">
+          <select
+            [(ngModel)]="selectedCreditId"
+            name="selectedCreditId"
+            (change)="selectCreditToEdit(editableCredits().find((credit) => credit.id === selectedCreditId) ?? editableCredits()[0])"
+          >
+            @for (credit of editableCredits(); track credit.id) {
+              <option [ngValue]="credit.id">
+                {{ credit.personName || 'Unknown person' }} - {{ credit.amount | number: '1.0-0' }} DT - {{ credit.createdAt | date: 'mediumDate' }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <form class="person-form" (ngSubmit)="submitEditCredit()">
+          <div class="field-group">
+            <label for="edit-credit-person">{{ 'Person' | translate }}</label>
+            <input
+              id="edit-credit-person"
+              type="text"
+              [value]="editCreditForm.personName || ('Unknown person' | translate)"
+              readonly
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="edit-credit-amount">{{ 'Updated amount' | translate }}</label>
+            <input
+              id="edit-credit-amount"
+              type="number"
+              [value]="getUpdatedEditAmount()"
+              name="editAmount"
+              readonly
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="edit-credit-add-amount">{{ 'Add amount' | translate }}</label>
+            <input
+              id="edit-credit-add-amount"
+              type="number"
+              [(ngModel)]="editAmountToAdd"
+              name="editAmountToAdd"
+              min="0"
+              step="0.01"
+              required
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="edit-credit-remove-amount">{{ 'Remove amount' | translate }}</label>
+            <input
+              id="edit-credit-remove-amount"
+              type="number"
+              [(ngModel)]="editAmountToRemove"
+              name="editAmountToRemove"
+              min="0"
+              step="0.01"
+              required
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="edit-credit-notes">{{ 'Notes' | translate }}</label>
+            <textarea
+              id="edit-credit-notes"
+              rows="4"
+              [(ngModel)]="editCreditForm.notes"
+              name="editNotes"
+              [placeholder]="'Updated note' | translate"
+            ></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="danger-button" (click)="deleteSelectedCredit()">{{ 'Delete credit' | translate }}</button>
+            <button type="button" class="secondary-button" (click)="closeEditCreditForm()">{{ 'cancel' | translate }}</button>
+            <button type="button" class="secondary-button" (click)="printCreditNote()">{{ 'Print credit note' | translate }}</button>
+            <button type="submit" class="primary-button">{{ 'Save changes' | translate }}</button>
+          </div>
+        </form>
+      } @else {
+        <p class="empty-state">{{ 'No credits available to edit.' | translate }}</p>
+      }
+    </div>
+  </div>
+}
+
+@if (showAddPersonForm()) {
+  <div class="modal-backdrop" (click)="closeAddPersonForm()">
+    <div class="person-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ 'Add person' | translate }}</h3>
+        <button type="button" class="close-button" (click)="closeAddPersonForm()">×</button>
+      </div>
+
+      <form class="person-form" (ngSubmit)="submitPerson()">
+        <div class="field-group">
+          <label for="person-name">{{ 'Name' | translate }}</label>
+          <input
+            id="person-name"
+            type="text"
+            [(ngModel)]="personForm.name"
+            name="name"
+            [placeholder]="'Ali Ben Ahmed' | translate"
+            required
+          />
+        </div>
+
+        <div class="field-group">
+          <label for="person-phone">{{ 'Phone' | translate }}</label>
+          <input
+            id="person-phone"
+            type="text"
+            [(ngModel)]="personForm.phone"
+            name="phone"
+            [placeholder]="'55 789 123' | translate"
+          />
+        </div>
+
+        <div class="field-group">
+          <label for="person-address">{{ 'Adresse' | translate }}</label>
+          <input
+            id="person-address"
+            type="text"
+            [(ngModel)]="personForm.address"
+            name="address"
+            [placeholder]="'Rue de la Kasbah, Tunis' | translate"
+          />
+        </div>
+
+        <div class="field-group">
+          <label for="person-notes">{{ 'Notes' | translate }}</label>
+          <textarea
+            id="person-notes"
+            rows="4"
+            [(ngModel)]="personForm.notes"
+            name="notes"
+            [placeholder]="'Acheteur régulier de cigarettes' | translate"
+          ></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="closeAddPersonForm()">{{ 'cancel' | translate }}</button>
+          <button type="submit" class="primary-button">{{ 'Save person' | translate }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showAddCreditForm()) {
+  <div class="modal-backdrop" (click)="closeAddCreditForm()">
+    <div class="person-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ 'Add credit' | translate }}</h3>
+        <button type="button" class="close-button" (click)="closeAddCreditForm()">×</button>
+      </div>
+
+      <form class="person-form" (ngSubmit)="submitCredit()">
+        <div class="field-group">
+          <label for="credit-person-id">{{ 'Person' | translate }}</label>
+          <select
+            id="credit-person-id"
+            [(ngModel)]="creditForm.personId"
+            name="personId"
+            required
+          >
+            <option [ngValue]="0" disabled>{{ 'Select a person' | translate }}</option>
+            @for (person of persons(); track person.id) {
+              <option [ngValue]="person.id">{{ person.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label for="credit-amount">{{ 'Amount' | translate }}</label>
+          <input
+            id="credit-amount"
+            type="number"
+            [(ngModel)]="creditForm.amount"
+            name="amount"
+            min="0.01"
+            step="0.01"
+            [placeholder]="'2500' | translate"
+            required
+          />
+        </div>
+
+        <div class="field-group">
+          <label for="credit-notes">{{ 'Notes' | translate }}</label>
+          <textarea
+            id="credit-notes"
+            rows="4"
+            [(ngModel)]="creditForm.notes"
+            name="notes"
+            [placeholder]="'Short term loan for equipment' | translate"
+          ></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="closeAddCreditForm()">{{ 'cancel' | translate }}</button>
+          <button type="submit" class="primary-button">{{ 'Save credit' | translate }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showSearchPersonForm()) {
+  <div class="modal-backdrop" (click)="closeSearchPersonForm()">
+    <div class="search-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ 'Search person' | translate }}</h3>
+        <button type="button" class="close-button" (click)="closeSearchPersonForm()">×</button>
+      </div>
+
+      <div class="search-box">
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          name="searchTerm"
+          [placeholder]="'Search by name' | translate"
+          (keyup.enter)="searchPerson()"
+        />
+        <button type="button" class="primary-button" (click)="searchPerson()">{{ 'Search' | translate }}</button>
+      </div>
+
+      @if (searchResults.length > 0) {
+        <div class="person-search-results">
+          <div class="result-list">
+            @for (person of searchResults; track person.id) {
+              <button
+                type="button"
+                class="result-item"
+                [class.active]="selectedPerson?.id === person.id"
+                (click)="selectPerson(person)"
+              >
+                <span>{{ person.name }}</span>
+                <small>{{ person.credits?.length ?? 0 }} {{ 'credit(s)' | translate }}</small>
+              </button>
+            }
+          </div>
+
+          @if (selectedPerson) {
+            <div class="credit-details">
+              <h4>{{ selectedPerson.name }}</h4>
+
+              @if ((selectedPerson.credits ?? []).length > 0) {
+                <ul class="person-credit-list">
+                  @for (credit of selectedPerson.credits ?? []; track credit.id) {
+                    <li>
+                      <div>
+                        <strong>{{ credit.amount | number: '1.0-0' }} DT</strong>
+                        <small class="status-text {{ getStatusClass(credit.status, credit.amount) }}">{{ getStatusLabel(credit.status, credit.amount) }}</small>
+                      </div>
+                      <span>{{ credit.createdAt | date: 'dd MMM yyyy' }}</span>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p>{{ 'No credits found for this person.' | translate }}</p>
+              }
+            </div>
+          }
+        </div>
+      } @else if (searchTerm.trim()) {
+        <p class="empty-state">{{ 'No person found.' | translate }}</p>
+      }
+    </div>
+  </div>
+}
+

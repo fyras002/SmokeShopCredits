@@ -1,0 +1,26 @@
+<main class="pin-page" [dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'">
+	<section class="pin-card" aria-labelledby="pin-title">
+		<button type="button" class="language-button" (click)="toggleLanguage()" [title]="'Change language' | translate">
+			{{ getLanguageLabel() }}
+		</button>
+		<div class="brand-mark" aria-hidden="true">GC</div>
+		<p class="eyebrow">{{ 'title' | translate }}</p>
+		<h1 id="pin-title">{{ 'welcomeBack' | translate }}</h1>
+		<p class="intro">{{ 'pinIntro' | translate }}</p>
+
+		<form (ngSubmit)="submitPin()">
+			<label for="pin">{{ 'securityPin' | translate }}</label>
+			<input id="pin" name="pin" type="password" inputmode="numeric" autocomplete="current-password"
+				maxlength="4" placeholder="****" [ngModel]="pin()" (ngModelChange)="updatePin($event)"
+				[attr.aria-invalid]="hasError()" autofocus />
+			@if (hasError()) {
+				<p class="error-message" role="alert">{{ 'invalidPin' | translate }}</p>
+			} @else {
+				<p class="hint">{{ 'protectedWorkspace' | translate }}</p>
+			}
+			<button type="submit" [disabled]="pin().length !== 4">{{ 'unlockWorkspace' | translate }}</button>
+		</form>
+	</section>
+
+	<p class="footer-note">{{ 'privateAccess' | translate }}</p>
+</main>
