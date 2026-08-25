@@ -1,0 +1,6 @@
+@ghaffaricredit_backend_HostAddress = http://localhost:5210
+
+GET {{ghaffaricredit_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
