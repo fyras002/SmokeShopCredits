@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Person } from '../models/person.model';
+import{API_BASE_URL} from '../api-config';
 
 @Injectable({
   providedIn: 'root',
@@ -10,7 +11,7 @@ export class PersonService {
   private readonly http = inject(HttpClient);
   // Local ASP.NET development API is not using a trusted SSL certificate in this setup,
   // so use HTTP for the browser to reach it during local development.
-  private readonly baseUrl = 'http://localhost:5210/api/Person';
+  private readonly baseUrl = `${API_BASE_URL}/Person`;
 
   getAll(): Observable<Person[]> {
     return this.http.get<Person[]>(this.baseUrl);

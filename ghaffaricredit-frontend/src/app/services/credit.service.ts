@@ -2,13 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Credit } from '../models/credit.model';
-
+import { API_BASE_URL } from '../api-config';
 @Injectable({
   providedIn: 'root',
 })
 export class CreditService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:5210/api/Credit';
+  private readonly baseUrl = `${API_BASE_URL}/Credit`;
 
   getAll(): Observable<Credit[]> {
     return this.http.get<Credit[]>(this.baseUrl);
