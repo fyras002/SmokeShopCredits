@@ -6,7 +6,8 @@ import fr from '../../assets/i18n/fr.json';
 
 @Pipe({
   name: 'translate',
-  standalone: true
+  standalone: true,
+  pure: false
 })
 export class TranslatePipe implements PipeTransform {
   private translations: any = { en, ar, fr };
