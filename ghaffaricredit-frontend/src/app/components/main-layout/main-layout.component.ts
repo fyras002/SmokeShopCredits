@@ -1,5 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, OnInit, signal, inject, effect } from '@angular/core';
+import { Component, OnInit, signal, inject, effect, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Credit } from '../../models/credit.model';
 import { Person } from '../../models/person.model';
@@ -19,6 +19,7 @@ export class MainLayoutComponent implements OnInit {
   private readonly personService = inject(PersonService);
   private readonly creditService = inject(CreditService);
   private readonly translationService = inject(TranslationService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   protected readonly title = signal('Ghaffari Credit');
   protected readonly currentLanguage = signal<'en' | 'ar' | 'fr'>('en');
@@ -121,6 +122,7 @@ export class MainLayoutComponent implements OnInit {
   toggleAllCredits(): void {
     this.showAllCredits.set(!this.showAllCredits());
     this.loadRecentCredits();
+    this.cdr.markForCheck();
   }
 
   getStatusLabel(status?: string | number | null, amount?: number): string {
@@ -208,6 +210,7 @@ export class MainLayoutComponent implements OnInit {
 
   openAddPersonForm(): void {
     this.showAddPersonForm.set(true);
+    this.cdr.markForCheck();
   }
 
   closeAddPersonForm(): void {
@@ -218,11 +221,13 @@ export class MainLayoutComponent implements OnInit {
       address: '',
       notes: '',
     };
+    this.cdr.markForCheck();
   }
 
   openAddCreditForm(): void {
     this.loadPersons();
     this.showAddCreditForm.set(true);
+    this.cdr.markForCheck();
   }
 
   closeAddCreditForm(): void {
@@ -232,6 +237,7 @@ export class MainLayoutComponent implements OnInit {
       amount: 0,
       notes: '',
     };
+    this.cdr.markForCheck();
   }
 
   openEditCreditForm(): void {
@@ -259,9 +265,11 @@ export class MainLayoutComponent implements OnInit {
         }
 
         this.showEditCreditForm.set(true);
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Failed to load credits for edit:', error);
+        this.cdr.markForCheck();
       },
     });
   }
@@ -279,6 +287,7 @@ export class MainLayoutComponent implements OnInit {
     };
     this.editAmountToAdd = 0;
     this.editAmountToRemove = 0;
+    this.cdr.markForCheck();
   }
 
   populateEditForm(credit: Credit): void {
@@ -296,6 +305,7 @@ export class MainLayoutComponent implements OnInit {
 
   selectCreditToEdit(credit: Credit): void {
     this.populateEditForm(credit);
+    this.cdr.markForCheck();
   }
 
   getUpdatedEditAmount(): number {
@@ -324,9 +334,11 @@ export class MainLayoutComponent implements OnInit {
         this.closeEditCreditForm();
         this.loadRecentCredits();
         this.loadPersons();
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Failed to update credit:', error);
+        this.cdr.markForCheck();
       },
     });
   }
@@ -352,13 +364,16 @@ export class MainLayoutComponent implements OnInit {
 
         if (remainingCredits.length === 0) {
           this.closeEditCreditForm();
+          this.cdr.markForCheck();
           return;
         }
 
         this.populateEditForm(remainingCredits[0]);
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Failed to delete credit:', error);
+        this.cdr.markForCheck();
       },
     });
   }
@@ -545,6 +560,7 @@ export class MainLayoutComponent implements OnInit {
     this.searchTerm = '';
     this.searchResults = [];
     this.selectedPerson = null;
+    this.cdr.markForCheck();
   }
 
   closeSearchPersonForm(): void {
@@ -552,6 +568,7 @@ export class MainLayoutComponent implements OnInit {
     this.searchTerm = '';
     this.searchResults = [];
     this.selectedPerson = null;
+    this.cdr.markForCheck();
   }
 
   toggleLanguage(): void {
@@ -575,6 +592,7 @@ export class MainLayoutComponent implements OnInit {
     if (!term) {
       this.searchResults = [];
       this.selectedPerson = null;
+      this.cdr.markForCheck();
       return;
     }
 
@@ -582,17 +600,20 @@ export class MainLayoutComponent implements OnInit {
       next: (persons) => {
         this.searchResults = persons;
         this.selectedPerson = persons[0] ?? null;
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Failed to search persons:', error);
         this.searchResults = [];
         this.selectedPerson = null;
+        this.cdr.markForCheck();
       },
     });
   }
 
   selectPerson(person: Person): void {
     this.selectedPerson = person;
+    this.cdr.markForCheck();
   }
 
   submitPerson(): void {
@@ -608,9 +629,11 @@ export class MainLayoutComponent implements OnInit {
         console.log('Person created successfully');
         this.closeAddPersonForm();
         this.loadPersons();
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Failed to create person:', error);
+        this.cdr.markForCheck();
       },
     });
   }
@@ -628,9 +651,11 @@ export class MainLayoutComponent implements OnInit {
         this.closeAddCreditForm();
         this.loadRecentCredits();
         this.loadPersons();
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Failed to create credit:', error);
+        this.cdr.markForCheck();
       },
     });
   }
