@@ -578,7 +578,7 @@ export class MainLayoutComponent implements OnInit {
     const nextLang = languages[nextIndex];
     this.currentLanguage.set(nextLang);
     this.translationService.setLanguage(nextLang);
-    location.reload();
+    this.cdr.markForCheck();
   }
 
   getLanguageLabel(): string {
