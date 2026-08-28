@@ -64,6 +64,21 @@ export class MainLayoutComponent implements OnInit {
   searchResults: Person[] = [];
   selectedPerson: Person | null = null;
 
+  private readonly actionCooldownMs = 700;
+  private readonly lastActionTimes = new Map<string, number>();
+
+  private isActionAllowed(actionKey: string, cooldownMs = this.actionCooldownMs): boolean {
+    const now = Date.now();
+    const lastClickAt = this.lastActionTimes.get(actionKey) ?? 0;
+
+    if (now - lastClickAt < cooldownMs) {
+      return false;
+    }
+
+    this.lastActionTimes.set(actionKey, now);
+    return true;
+  }
+
   ngOnInit(): void {
     // Sync the component's language signal with the service's current language
     this.currentLanguage.set(this.translationService.getLanguage() as 'en' | 'ar' | 'fr');
@@ -323,6 +338,10 @@ export class MainLayoutComponent implements OnInit {
       return;
     }
 
+    if (!this.isActionAllowed('submitEditCredit')) {
+      return;
+    }
+
     const payload = {
       amount: this.getUpdatedEditAmount(),
       notes: this.editCreditForm.notes,
@@ -346,6 +365,10 @@ export class MainLayoutComponent implements OnInit {
   deleteSelectedCredit(): void {
     if (this.selectedCreditId === null) {
       console.error('No credit selected for deletion.');
+      return;
+    }
+
+    if (!this.isActionAllowed('deleteSelectedCredit')) {
       return;
     }
 
@@ -617,6 +640,10 @@ export class MainLayoutComponent implements OnInit {
   }
 
   submitPerson(): void {
+    if (!this.isActionAllowed('submitPerson')) {
+      return;
+    }
+
     const payload: Person = {
       name: this.personForm.name,
       phone: this.personForm.phone,
@@ -639,6 +666,10 @@ export class MainLayoutComponent implements OnInit {
   }
 
   submitCredit(): void {
+    if (!this.isActionAllowed('submitCredit')) {
+      return;
+    }
+
     const payload: Credit = {
       personId: this.creditForm.personId,
       amount: Number(this.creditForm.amount),
@@ -663,6 +694,10 @@ export class MainLayoutComponent implements OnInit {
   deleteSelectedPerson(): void {
     if (!this.selectedPerson || !this.selectedPerson.id) {
       console.error('No person selected for deletion.');
+      return;
+    }
+
+    if (!this.isActionAllowed('deleteSelectedPerson')) {
       return;
     }
 
