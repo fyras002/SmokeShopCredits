@@ -105,5 +105,7 @@
   "Search by name": "البحث بالاسم",
   "No person found.": "لم يتم العثور على شخص.",
   "credit(s)": "ائتمان",
-  "No credits found for this person.": "لم يتم العثور على ائتمانات لهذا الشخص."
+  "No credits found for this person.": "لم يتم العثور على ائتمانات لهذا الشخص.",
+  "Delete person": "حذف الشخص",
+  "Close": "إغلاق"
 }

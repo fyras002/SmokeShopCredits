@@ -105,5 +105,7 @@
   "Search by name": "Search by name",
   "No person found.": "No person found.",
   "credit(s)": "credit(s)",
-  "No credits found for this person.": "No credits found for this person."
+  "No credits found for this person.": "No credits found for this person.",
+  "Delete person": "Delete person",
+  "Close": "Close"
 }

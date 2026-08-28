@@ -659,4 +659,30 @@ export class MainLayoutComponent implements OnInit {
       },
     });
   }
+
+  deleteSelectedPerson(): void {
+    if (!this.selectedPerson || !this.selectedPerson.id) {
+      console.error('No person selected for deletion.');
+      return;
+    }
+
+    const personName = this.selectedPerson.name || 'Unknown person';
+    if (!window.confirm(`Are you sure you want to delete ${personName}? This action cannot be undone.`)) {
+      return;
+    }
+
+    this.personService.delete(this.selectedPerson.id).subscribe({
+      next: () => {
+        console.log('Person deleted successfully');
+        this.closeSearchPersonForm();
+        this.loadPersons();
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Failed to delete person:', error);
+        this.cdr.markForCheck();
+      },
+    });
+  }
 }
+
