@@ -64,6 +64,12 @@ export class MainLayoutComponent implements OnInit {
   searchResults: Person[] = [];
   selectedPerson: Person | null = null;
 
+  private isSubmittingPerson = false;
+  private isSubmittingCredit = false;
+  private isSubmittingEditCredit = false;
+  private isDeletingCredit = false;
+  private isDeletingPerson = false;
+
   ngOnInit(): void {
     // Sync the component's language signal with the service's current language
     this.currentLanguage.set(this.translationService.getLanguage() as 'en' | 'ar' | 'fr');
@@ -318,11 +324,14 @@ export class MainLayoutComponent implements OnInit {
   }
 
   submitEditCredit(): void {
-    if (!this.selectedCreditId) {
-      console.error('No credit selected for edit.');
+    if (!this.selectedCreditId || this.isSubmittingEditCredit) {
+      if (!this.selectedCreditId) {
+        console.error('No credit selected for edit.');
+      }
       return;
     }
 
+    this.isSubmittingEditCredit = true;
     const payload = {
       amount: this.getUpdatedEditAmount(),
       notes: this.editCreditForm.notes,
@@ -331,6 +340,7 @@ export class MainLayoutComponent implements OnInit {
     this.creditService.update(this.selectedCreditId, payload).subscribe({
       next: () => {
         console.log('Credit updated successfully');
+        this.isSubmittingEditCredit = false;
         this.closeEditCreditForm();
         this.loadRecentCredits();
         this.loadPersons();
@@ -338,14 +348,17 @@ export class MainLayoutComponent implements OnInit {
       },
       error: (error) => {
         console.error('Failed to update credit:', error);
+        this.isSubmittingEditCredit = false;
         this.cdr.markForCheck();
       },
     });
   }
 
   deleteSelectedCredit(): void {
-    if (this.selectedCreditId === null) {
-      console.error('No credit selected for deletion.');
+    if (this.selectedCreditId === null || this.isDeletingCredit) {
+      if (this.selectedCreditId === null) {
+        console.error('No credit selected for deletion.');
+      }
       return;
     }
 
@@ -354,8 +367,10 @@ export class MainLayoutComponent implements OnInit {
       return;
     }
 
+    this.isDeletingCredit = true;
     this.creditService.delete(this.selectedCreditId).subscribe({
       next: () => {
+        this.isDeletingCredit = false;
         const remainingCredits = this.editableCredits().filter(
           (credit) => credit.id !== this.selectedCreditId
         );
@@ -373,6 +388,7 @@ export class MainLayoutComponent implements OnInit {
       },
       error: (error) => {
         console.error('Failed to delete credit:', error);
+        this.isDeletingCredit = false;
         this.cdr.markForCheck();
       },
     });
@@ -617,6 +633,11 @@ export class MainLayoutComponent implements OnInit {
   }
 
   submitPerson(): void {
+    if (this.isSubmittingPerson) {
+      return;
+    }
+
+    this.isSubmittingPerson = true;
     const payload: Person = {
       name: this.personForm.name,
       phone: this.personForm.phone,
@@ -627,18 +648,25 @@ export class MainLayoutComponent implements OnInit {
     this.personService.create(payload).subscribe({
       next: () => {
         console.log('Person created successfully');
+        this.isSubmittingPerson = false;
         this.closeAddPersonForm();
         this.loadPersons();
         this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Failed to create person:', error);
+        this.isSubmittingPerson = false;
         this.cdr.markForCheck();
       },
     });
   }
 
   submitCredit(): void {
+    if (this.isSubmittingCredit) {
+      return;
+    }
+
+    this.isSubmittingCredit = true;
     const payload: Credit = {
       personId: this.creditForm.personId,
       amount: Number(this.creditForm.amount),
@@ -648,6 +676,7 @@ export class MainLayoutComponent implements OnInit {
     this.creditService.create(payload).subscribe({
       next: () => {
         console.log('Credit created successfully');
+        this.isSubmittingCredit = false;
         this.closeAddCreditForm();
         this.loadRecentCredits();
         this.loadPersons();
@@ -655,14 +684,17 @@ export class MainLayoutComponent implements OnInit {
       },
       error: (error) => {
         console.error('Failed to create credit:', error);
+        this.isSubmittingCredit = false;
         this.cdr.markForCheck();
       },
     });
   }
 
   deleteSelectedPerson(): void {
-    if (!this.selectedPerson || !this.selectedPerson.id) {
-      console.error('No person selected for deletion.');
+    if (!this.selectedPerson || !this.selectedPerson.id || this.isDeletingPerson) {
+      if (!this.selectedPerson || !this.selectedPerson.id) {
+        console.error('No person selected for deletion.');
+      }
       return;
     }
 
@@ -671,15 +703,18 @@ export class MainLayoutComponent implements OnInit {
       return;
     }
 
+    this.isDeletingPerson = true;
     this.personService.delete(this.selectedPerson.id).subscribe({
       next: () => {
         console.log('Person deleted successfully');
+        this.isDeletingPerson = false;
         this.closeSearchPersonForm();
         this.loadPersons();
         this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Failed to delete person:', error);
+        this.isDeletingPerson = false;
         this.cdr.markForCheck();
       },
     });
