@@ -64,7 +64,7 @@ export class MainLayoutComponent implements OnInit {
   searchResults: Person[] = [];
   selectedPerson: Person | null = null;
 
-  private readonly actionCooldownMs = 700;
+  private readonly actionCooldownMs = 1500;
   private readonly lastActionTimes = new Map<string, number>();
 
   private isActionAllowed(actionKey: string, cooldownMs = this.actionCooldownMs): boolean {
