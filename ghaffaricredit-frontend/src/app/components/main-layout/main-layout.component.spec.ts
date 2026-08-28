@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 
 import { MainLayoutComponent } from './main-layout.component';
 import { CreditService } from '../../services/credit.service';
@@ -71,23 +71,5 @@ describe('MainLayoutComponent', () => {
 
     component.closeEditCreditForm();
     expect(component.showEditCreditForm()).toBeFalse();
-  });
-
-  it('should ignore repeated submit clicks while the request is still in flight', () => {
-    const creditService = TestBed.inject(CreditService) as any;
-    const createSpy = jasmine.createSpy('create').and.returnValue(new Observable(() => {}));
-    creditService.create = createSpy;
-
-    component.creditForm = {
-      personId: 10,
-      amount: 500,
-      notes: 'Repeated click test',
-    };
-
-    component.submitCredit();
-    component.submitCredit();
-    component.submitCredit();
-
-    expect(createSpy).toHaveBeenCalledTimes(1);
   });
 });

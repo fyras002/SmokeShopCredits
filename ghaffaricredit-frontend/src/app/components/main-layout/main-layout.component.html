@@ -162,10 +162,10 @@
           </div>
 
           <div class="modal-actions">
-            <button type="button" class="danger-button" (click)="deleteSelectedCredit()" [disabled]="isDeletingCredit">{{ isDeletingCredit ? ('Deleting...' | translate) : ('Delete credit' | translate) }}</button>
+            <button type="button" class="danger-button" (click)="deleteSelectedCredit()">{{ 'Delete credit' | translate }}</button>
             <button type="button" class="secondary-button" (click)="closeEditCreditForm()">{{ 'cancel' | translate }}</button>
             <button type="button" class="secondary-button" (click)="printCreditNote()">{{ 'Print credit note' | translate }}</button>
-            <button type="submit" class="primary-button" [disabled]="isSubmittingEditCredit">{{ isSubmittingEditCredit ? ('Saving...' | translate) : ('Save changes' | translate) }}</button>
+            <button type="submit" class="primary-button">{{ 'Save changes' | translate }}</button>
           </div>
         </form>
       } @else {
@@ -231,7 +231,7 @@
 
         <div class="modal-actions">
           <button type="button" class="secondary-button" (click)="closeAddPersonForm()">{{ 'cancel' | translate }}</button>
-          <button type="submit" class="primary-button" [disabled]="isSubmittingPerson">{{ isSubmittingPerson ? ('Saving...' | translate) : ('Save person' | translate) }}</button>
+          <button type="submit" class="primary-button">{{ 'Save person' | translate }}</button>
         </div>
       </form>
     </div>
@@ -289,7 +289,7 @@
 
         <div class="modal-actions">
           <button type="button" class="secondary-button" (click)="closeAddCreditForm()">{{ 'cancel' | translate }}</button>
-          <button type="submit" class="primary-button" [disabled]="isSubmittingCredit">{{ isSubmittingCredit ? ('Saving...' | translate) : ('Save credit' | translate) }}</button>
+          <button type="submit" class="primary-button">{{ 'Save credit' | translate }}</button>
         </div>
       </form>
     </div>
@@ -352,7 +352,7 @@
               }
 
               <div class="modal-actions" style="margin-top: 1.5rem;">
-                <button type="button" class="danger-button" (click)="deleteSelectedPerson()" [disabled]="isDeletingPerson">{{ isDeletingPerson ? ('Deleting...' | translate) : ('Delete person' | translate) }}</button>
+                <button type="button" class="danger-button" (click)="deleteSelectedPerson()">{{ 'Delete person' | translate }}</button>
                 <button type="button" class="secondary-button" (click)="closeSearchPersonForm()">{{ 'Close' | translate }}</button>
               </div>
             </div>
