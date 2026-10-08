@@ -24,19 +24,29 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngularApp",
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200", "https://ghaffaricredit-frontend.onrender.com")
+            policy.WithOrigins(
+                    "http://localhost:4200",
+                    "https://ghaffaricredit-frontend.onrender.com")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
 });
-//test
 
 var app = builder.Build();
 
+// Only redirect to HTTPS in development.
+// Render terminates SSL at its proxy, so this causes CORS/preflight issues in production.
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
+app.UseRouting();
+
 app.UseCors("AllowAngularApp");
 
-app.UseHttpsRedirection();
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();
