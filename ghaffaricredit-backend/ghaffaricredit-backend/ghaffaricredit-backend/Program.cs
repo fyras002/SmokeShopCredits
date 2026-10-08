@@ -29,6 +29,7 @@ builder.Services.AddCors(options =>
                   .AllowAnyMethod();
         });
 });
+//test
 
 var app = builder.Build();
 
