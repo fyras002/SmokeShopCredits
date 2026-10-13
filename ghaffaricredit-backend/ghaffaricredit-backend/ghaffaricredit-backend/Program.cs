@@ -10,11 +10,11 @@ var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_S
     ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString, sqlOptions =>
-        sqlOptions.EnableRetryOnFailure(
+    options.UseNpgsql(connectionString, npgsqlOptions =>
+        npgsqlOptions.EnableRetryOnFailure(
             maxRetryCount: 5,
             maxRetryDelay: TimeSpan.FromSeconds(10),
-            errorNumbersToAdd: null)));
+            errorCodesToAdd: null)));
 
 builder.Services.AddScoped<IPersonService, PersonService>();
 builder.Services.AddScoped<ICreditService, CreditService>();
